@@ -65,14 +65,12 @@ function Game() {
         y: 100
     };
 	this.DeltaX = 0;  // offset to starting point of spaceship
-    this.DeltaY = 0;
-	this.asteroidsProb = 0.03;
+	this.asteroidsProb = 0.01;
 	this.asteroids = [];
 	this.asteroidSpeed = {
         x: 0,
         y: 250
     };
-    this.asteroidRadius	= 40;
     this.spaceship_img = new Image();
     this.spaceship_img.src = "spaceship.png";
     this.asteroids_img = [null, null, null].map(_ => new Image());
@@ -122,6 +120,7 @@ Game.prototype.update = function(delta) {
         this.moveStars(delta);
 		this.spawnAsteroidsWithProb();
         this.moveAsteroids(delta);
+        this.collisionTest();
     }
 };
 
@@ -148,11 +147,11 @@ Game.prototype.spawnAsteroidsWithProb = function() {
         var asteroid = {
             x: getRandomInt(0, canvas.width),
             y: -50,
-            radius: this.asteroidRadius,
             speed: {
                 x: this.asteroidSpeed.x,
                 y: this.asteroidSpeed.y
             },
+            scale: Math.random() * (1.25 - 0.75) + 0.75,
             type: Math.floor(Math.random() * 3) + 1  		
         }
         this.asteroids.push(asteroid);		
@@ -179,6 +178,33 @@ Game.prototype.moveAsteroids = function(delta) {
         }
     }
 };
+
+Game.prototype.collisionTest = function() {
+    this.asteroids.forEach((asteroid, index) => {
+        // x/y cordinates of upper left corner of the spaceship
+        x = DEFAULT_WIDTH / 2 - 60 + this.DeltaX; 
+        y = DEFAULT_HEIGHT - 200;
+
+        x += 20 // tolerance area
+        y += 30
+
+        if ((x > asteroid.x)
+            && ((asteroid.x + 90 * asteroid.scale) > x)) {
+                if ((asteroid.y + 90 * asteroid.scale) > y) {
+                    this.asteroids.splice(index, 1);
+                    return true
+                }
+        }
+
+        if (((x + 65) < (asteroid.x + 90 * asteroid.scale))
+            && ((asteroid.x) < (x  + 65))) {
+                if ((asteroid.y + 90 * asteroid.scale) > y) {
+                    this.asteroids.splice(index, 1);
+                    return true
+                }
+        }
+    });
+}
 
 Game.prototype.render = function() {
     ctx.fillStyle = "#000";
@@ -217,12 +243,9 @@ Game.prototype.drawAsteroids = function() {
     for (var i = 0; i < this.asteroids.length; i++) {
         var asteroid = this.asteroids[i];
 
-        if (asteroid.radius >= CIRCLE_THRESHOLD) {
-            ctx.drawImage(this.asteroids_img[asteroid.type - 1], 
-                          asteroid.x - 60, 
-                          asteroid.y - 60, 
-                          120, 120);
-        }
+        ctx.drawImage(this.asteroids_img[asteroid.type - 1], 
+                      asteroid.x, asteroid.y, 
+                      90 * asteroid.scale, 90 * asteroid.scale);
     }
 };
 
