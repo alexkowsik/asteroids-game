@@ -64,6 +64,8 @@ function Game() {
         x: 0,
         y: 100
     };
+    this.speedBoost = 1;  // gradually increasing over time
+    this.speedGain = 1.0002 // factor with which the game gets faster every time
 	this.DeltaX = 0;  // offset to starting point of spaceship
 	this.asteroidsProb = 0.01;
 	this.asteroids = [];
@@ -121,6 +123,8 @@ Game.prototype.update = function(delta) {
 		this.spawnAsteroidsWithProb();
         this.moveAsteroids(delta);
         this.collisionTest();
+
+        this.speedBoost *= this.speedGain
     }
 };
 
@@ -131,8 +135,8 @@ Game.prototype.moveStars = function(delta) {
 
             if (this.inBounds(star.x, star.y)) {
                 // move star
-                star.x += star.speed.x * delta;
-                star.y += star.speed.y * delta;
+                star.x += star.speed.x * delta * this.speedBoost;
+                star.y += star.speed.y * delta * this.speedBoost;
             } else {
                 // reset and respawn star at the top
                 star.x = getRandomInt(0, canvas.width);
@@ -164,16 +168,16 @@ Game.prototype.moveAsteroids = function(delta) {
 
         if(this.inBounds(asteroid.x, asteroid.y)) {
             // move asteroid
-            asteroid.x += asteroid.speed.x * delta;
-            asteroid.y += asteroid.speed.y * delta;
+            asteroid.x += asteroid.speed.x * delta * this.speedBoost;
+            asteroid.y += asteroid.speed.y * delta * this.speedBoost;
         } else {
             // arbitrary treshhold
             if (asteroid.y > 80) {
                 this.asteroids.splice(i, 1);
             } else {
                 // move asteroid
-                asteroid.x += asteroid.speed.x * delta;
-                asteroid.y += asteroid.speed.y * delta;
+                asteroid.x += asteroid.speed.x * delta * this.speedBoost;
+                asteroid.y += asteroid.speed.y * delta * this.speedBoost;
             }
         }
     }
@@ -263,19 +267,19 @@ Game.prototype.moveSpaceship = function(e) {
         !(this.inBounds(DEFAULT_WIDTH / 2 - 10 + this.DeltaX - 50, 
                         DEFAULT_HEIGHT - 150))) {
 		if (this.DeltaX > 0) {
-			this.DeltaX -= 10;
+			this.DeltaX -= 10 * this.speedBoost;
 		} else {
-			this.DeltaX += 10;
+			this.DeltaX += 10 * this.speedBoost;
 		}
 		return;
 	}
 
     switch(e.keyCode) {
         case 37:
-            this.DeltaX -= 10;
+            this.DeltaX -= 10 * this.speedBoost;
             break;
         case 39:
-            this.DeltaX += 10;
+            this.DeltaX += 10 * this.speedBoost;
             break;
     }
 };
