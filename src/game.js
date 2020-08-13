@@ -1,79 +1,28 @@
-var canvas = document.createElement("canvas", tabindex='1'),
-    ctx = canvas.getContext("2d"),
-    container = document.getElementById("gameCanvasContainer");
+/*================================================*/
+/* Main Game Class */
+/*================================================*/
 
-var DEFAULT_WIDTH = 1000, DEFAULT_HEIGHT = 800;
+var ctx, WIDTH, HEIGHT;
 var CIRCLE_THRESHOLD = 1.12; // minimum radius for a circle to be visible using 
                              // the arc method
 
-canvas.width = DEFAULT_WIDTH;
-canvas.height = DEFAULT_HEIGHT;
-container.appendChild(canvas);
 
 // static global function that gets a random integer between min and max
 var getRandomInt = function(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+export function Game(c, w, h) {
+    ctx = c;
+    WIDTH = w;
+    HEIGHT = h;
 
-/*==============================*/
-/* Main Loop
-/*==============================*/
-var main = function() {
-    var now = Date.now();
-    var delta = (now - then) / 1000;
-    // delta = Math.min(delta, 0.1);
-
-    if(game.running) {
-        game.update(delta);
-        game.render();
-
-        if (game.crash) {
-            if (game.lifes <= 0) {
-                console.log('Game over');
-                game.running = false;
-            }
-
-            if (game.crashFramesCounter == 0) {
-                game.spaceship_img.src = "spaceship_hurt.png";
-            }
-
-            game.crashFramesCounter += 1
-
-            if (game.crashFramesCounter >= 300) {
-                game.crashFramesCounter = 0;
-                game.crash = false;
-                game.spaceship_img.src = "spaceship.png";
-            }
-        }
-    }
-    then = now;
-    animationFrame(main);
-};
-
-var then = Date.now();
-var game = new Game();
-
-var animationFrame = 
-    window.requestAnimationFrame       ||
-    window.webkitRequestAnimationFrame ||
-    window.mozRequestAnimationFrame    ||
-    window.oRequestAnimationFrame      ||
-    window.msRequestAnimationFrame     || null;
-
-if(animationFrame !== null) {
-    animationFrame(main, canvas);
-} 
-
-
-/*================================================*/
-/* Main Game Class */
-/*================================================*/
-
-function Game() {
     this.running = true;
+    this.gameOver = false;
     this.FPS = 60; // for setInterval fallback only
     this.started = false;
+    this.inStartMenu = false;
+    this.buttonColor = "white";
     this.crash = false;
     this.crashFramesCounter = 0;
     this.lifes = 3;
@@ -92,20 +41,22 @@ function Game() {
     };
 
     this.DeltaX = 0;  // offset to starting point of spaceship
+    this.astronaut_img = new Image();
+    this.astronaut_img.src = "img/astronaut.png";
     this.spaceship_img = new Image();
-    this.spaceship_img.src = "spaceship.png";
+    this.spaceship_img.src = "img/spaceship.png";
     this.asteroids_img = [null, null, null].map(_ => new Image());
 
     this.lifes_img = [null, null, null, null].map(_ => new Image());
     this.lifes_img.forEach((element, index) => {
-        element.src = "lifes_" + String(index) + ".png";
+        element.src = "img/lifes_" + String(index) + ".png";
     });
 
     this.goodies = []
     this.goodieProb = 0.005;
     this.collected_goodies = 0;
     this.goodie_img = new Image();
-    this.goodie_img.src = "goodie.png";
+    this.goodie_img.src = "img/goodie.png";
 
 	this.asteroidsProb = 0.01;
 	this.asteroids = [];
@@ -114,7 +65,7 @@ function Game() {
         y: 250
     };
     this.asteroids_img.forEach((element, index) => {
-        element.src = "asteroid" + String(index + 1) + ".png";
+        element.src = "img/asteroid" + String(index + 1) + ".png";
     });
 };
 
@@ -132,8 +83,8 @@ Game.prototype.initBackground = function() {
 
         for (var j = 0; j < this.baseStarNum * i; j++) {
             var star = {
-                x: getRandomInt(0, canvas.width),
-                y: getRandomInt(0, canvas.height),
+                x: getRandomInt(0, WIDTH),
+                y: getRandomInt(0, HEIGHT),
                 radius: Math.round(this.baseStarRadius / i * 100) / 100,
                 speed: {
                     x: Math.round(this.baseStarSpeed.x / i * 100) / 20,
@@ -147,15 +98,20 @@ Game.prototype.initBackground = function() {
 };
 
 Game.prototype.inBounds = function(x, y) {
-    return ((x > 0 && x < canvas.width) && (y > 0 && y < canvas.height));
+    return ((x > 0 && x < WIDTH) && (y > 0 && y < HEIGHT));
 };
 
 Game.prototype.update = function(delta) {
     if (!this.started) {
         this.started = true;
+        this.inStartMenu = true;
         this.initBackground();
         console.log("Game started");
-    } else {
+    } 
+    else if (this.inStartMenu || this.gameOver) {
+        this.moveStars(delta);
+    } 
+    else {
         this.meters += 1/3;
         this.moveStars(delta);
         this.spawnAsteroidWithProb();
@@ -185,7 +141,7 @@ Game.prototype.moveStars = function(delta) {
                 star.y += star.speed.y * delta * this.speedBoost;
             } else {
                 // reset and respawn star at the top
-                star.x = getRandomInt(0, canvas.width);
+                star.x = getRandomInt(0, WIDTH);
                 star.y = 1;
             }
         }
@@ -195,7 +151,7 @@ Game.prototype.moveStars = function(delta) {
 Game.prototype.spawnAsteroidWithProb = function() {
     if (Math.random() < this.asteroidsProb) {
         var asteroid = {
-            x: getRandomInt(0, canvas.width),
+            x: getRandomInt(0, WIDTH),
             y: -50,
             speed: {
                 x: this.asteroidSpeed.x,
@@ -211,7 +167,7 @@ Game.prototype.spawnAsteroidWithProb = function() {
 Game.prototype.spawnGoodieWithProb = function() {
     if (Math.random() < this.goodieProb) {
         var goodie = {
-            x: getRandomInt(0, canvas.width),
+            x: getRandomInt(0, WIDTH),
             y: -50,
             speed: {
                 x: this.asteroidSpeed.x,
@@ -270,8 +226,8 @@ Game.prototype.collisionTest = function() {
     // Check for collison with asteroids
     this.asteroids.forEach((asteroid, index) => {
         // x/y cordinates of upper left corner of the spaceship
-        x = DEFAULT_WIDTH / 2 - 60 + this.DeltaX; 
-        y = DEFAULT_HEIGHT - 200;
+        var x = WIDTH / 2 - 60 + this.DeltaX; 
+        var y = HEIGHT - 200;
 
         x += 25 // tolerance area
         y += 30
@@ -298,8 +254,8 @@ Game.prototype.collisionTest = function() {
     // Check for collison with goodies
     this.goodies.forEach((goodie, index) => {
         // x/y cordinates of upper left corner of the spaceship
-        x = DEFAULT_WIDTH / 2 - 60 + this.DeltaX; 
-        y = DEFAULT_HEIGHT - 200;
+        var x = WIDTH / 2 - 60 + this.DeltaX; 
+        var y = HEIGHT - 200;
 
         if ((x > goodie.x)
             && ((goodie.x + 90) > x)) {
@@ -331,20 +287,45 @@ Game.prototype.collisionTest = function() {
         }
     });
     return flag;
-}
+};
 
 Game.prototype.render = function() {
     ctx.fillStyle = "#000";
     ctx.strokeStyle = "#FFF";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.strokeRect(0, 0, WIDTH, HEIGHT);
     ctx.fillStyle = "#FFF";
 
     this.drawStars();
-    this.drawAsteroids();
-    this.drawGoodies();
-    this.drawSpaceship();
-    this.drawHUD();
+
+    if (this.inStartMenu) {
+        this.drawStartMenu();
+    }
+    else if (this.gameOver) {
+        this.drawGameOverScreen();
+    }
+    else {
+        this.drawAsteroids();
+        this.drawGoodies();
+        this.drawSpaceship();
+        this.drawHUD();
+    }
+};
+
+Game.prototype.drawStartMenu = function() {
+    ctx.beginPath();
+
+    // Start Game button
+    ctx.lineWidth = "4";
+    ctx.strokeStyle = this.buttonColor;
+    ctx.rect(WIDTH/3, HEIGHT/7 * 5 - 20, WIDTH/3, HEIGHT/6);
+    ctx.stroke();
+
+    ctx.font = "42px Arial";
+    ctx.fillStyle = this.buttonColor;
+    ctx.fillText("START GAME", WIDTH/3 + 25, HEIGHT/7 * 5.55);
+
+    ctx.drawImage(this.astronaut_img, WIDTH/3, HEIGHT/7, WIDTH/3, WIDTH/3);
 };
 
 Game.prototype.drawStars = function() {
@@ -387,8 +368,8 @@ Game.prototype.drawGoodies = function() {
 
 Game.prototype.drawSpaceship = function() {
   ctx.drawImage(this.spaceship_img, 
-                DEFAULT_WIDTH / 2 - 60 + this.DeltaX, 
-                DEFAULT_HEIGHT - 200, 105, 153);
+                WIDTH / 2 - 60 + this.DeltaX, 
+                HEIGHT - 200, 105, 153);
 };
 
 Game.prototype.drawHUD = function() {
@@ -396,19 +377,19 @@ Game.prototype.drawHUD = function() {
         40, 40, 150, 50);
     ctx.font = "40px Arial";
     ctx.fillText(Math.floor(this.meters).toString() + "m", 
-                 DEFAULT_WIDTH - 180, 75);
-    ctx.fillText(this.collected_goodies, DEFAULT_WIDTH / 2 - 40, 79);
+                 WIDTH - 180, 75);
+    ctx.fillText(this.collected_goodies, WIDTH / 2 - 40, 79);
     ctx.drawImage(this.goodie_img,
-                  DEFAULT_WIDTH / 2, 34, 60, 60);
+                  WIDTH / 2, 34, 60, 60);
 }
  
 Game.prototype.moveSpaceship = function(e) {
 	e.preventDefault();	
 
-    if (!(this.inBounds(DEFAULT_WIDTH / 2 - 10 + this.DeltaX + 50, 
-                        DEFAULT_HEIGHT - 150)) ||
-        !(this.inBounds(DEFAULT_WIDTH / 2 - 10 + this.DeltaX - 50, 
-                        DEFAULT_HEIGHT - 150))) {
+    if (!(this.inBounds(WIDTH / 2 - 10 + this.DeltaX + 50, 
+                        HEIGHT - 150)) ||
+        !(this.inBounds(WIDTH / 2 - 10 + this.DeltaX - 50, 
+                        HEIGHT - 150))) {
 		if (this.DeltaX > 0) {
 			this.DeltaX -= 10 * this.speedBoost;
 		} else {
@@ -426,5 +407,3 @@ Game.prototype.moveSpaceship = function(e) {
             break;
     }
 };
-
-document.onkeydown = game.moveSpaceship.bind(game);
