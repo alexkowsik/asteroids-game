@@ -22,7 +22,7 @@ export function Game(c, w, h) {
     this.isInStartMenu = false;
     this.started = false;
     this.crash = false; // singals crash to main loop so images can be adjusted
-    this.crashFrameCounter = 0;
+    this.crashFramesCounter = 0;
 
     this.lifes = 3;
     this.meters = 0;
@@ -123,6 +123,7 @@ Game.prototype.startNewGame = function () {
     this.started = true;
     this.isInStartMenu = false;
     this.crash = false;
+    this.crashFramesCounter = 0;
     this.lifes = 3;
     this.speedBoost = 1;
     this.bgLayers = [];
