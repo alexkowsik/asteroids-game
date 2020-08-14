@@ -41,7 +41,7 @@ var main = function () {
             }
 
             if (game.crashFramesCounter == 0) {
-                game.spaceship_img.src = 'img/spaceship_hurt.png';
+                game.spaceshipUsed = game.spaceshipHurt_img;
             }
 
             game.crashFramesCounter += 1;
@@ -49,7 +49,7 @@ var main = function () {
             if (game.crashFramesCounter >= 300) {
                 game.crashFramesCounter = 0;
                 game.crash = false;
-                game.spaceship_img.src = 'img/spaceship.png';
+                game.spaceshipUsed = game.spaceship_img;
             }
         }
     }

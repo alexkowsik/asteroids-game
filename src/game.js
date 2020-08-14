@@ -56,6 +56,9 @@ export function Game(c, w, h) {
     // loads spaceship, lifes and asteroids images
     this.spaceship_img = new Image();
     this.spaceship_img.src = 'img/spaceship.png';
+    this.spaceshipHurt_img = new Image();
+    this.spaceshipHurt_img.src = 'img/spaceship_hurt.png';
+    this.spaceshipUsed = this.spaceship_img;
 
     this.asteroids_img = [null, null, null].map((_) => new Image());
     this.asteroids_img.forEach((element, index) => {
@@ -130,6 +133,7 @@ Game.prototype.startNewGame = function () {
     this.spaceshipOffset = 0;
     this.goodies = [];
     this.asteroids = [];
+    this.spaceshipUsed = this.spaceship_img;
 
     if (this.meters > this.highscoreMeters) {
         this.highscoreMeters = this.meters;
@@ -275,6 +279,7 @@ Game.prototype.moveGoodies = function (delta) {
     }
 };
 
+// returns true if a collision with an asteroid occured, otherwise false
 Game.prototype.collisionTest = function () {
     var crashedWithAsteroid = false;
 
@@ -310,6 +315,11 @@ Game.prototype.collisionTest = function () {
         }
     });
 
+    if (crashedWithAsteroid) {
+        this.crashFramesCounter = 0;
+        return true;
+    }
+
     // Check for collison with goodies
     this.goodies.forEach((goodie, index) => {
         // x/y cordinates of upper left corner of the spaceship
@@ -338,7 +348,7 @@ Game.prototype.collisionTest = function () {
         }
     });
 
-    return crashedWithAsteroid;
+    return false;
 };
 
 /* ================================== DRAW ================================== */
@@ -437,7 +447,7 @@ Game.prototype.drawGoodies = function () {
 // draw spaceship with current offset
 Game.prototype.drawSpaceship = function () {
     ctx.drawImage(
-        this.spaceship_img,
+        this.spaceshipUsed,
         WIDTH / 2 - 60 + this.spaceshipOffset,
         HEIGHT - 200,
         105,
