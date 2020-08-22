@@ -38,9 +38,9 @@ export function Game(c, w, h) {
 
     // stars background, has different "layers" of stars (with different speeds)
     this.bgLayers = [];
-    this.numBgLayers = 12;
-    this.baseStarNum = 16;
-    this.baseStarRadius = 1.5;
+    this.numBgLayers = 10;
+    this.baseStarNum = 14;
+    this.baseStarRadius = 1.8;
     this.baseStarSpeed = {
         x: 0,
         y: 100,
@@ -60,7 +60,7 @@ export function Game(c, w, h) {
     this.spaceshipHurt_img.src = 'img/spaceship_hurt.png';
     this.spaceshipUsed = this.spaceship_img;
 
-    this.asteroids_img = [null, null, null].map((_) => new Image());
+    this.asteroids_img = [null, null, null, null].map((_) => new Image());
     this.asteroids_img.forEach((element, index) => {
         element.src = 'img/asteroid' + String(index + 1) + '.png';
     });
@@ -386,9 +386,9 @@ Game.prototype.drawStartMenu = function () {
     ctx.rect(WIDTH / 3, (HEIGHT / 7) * 5 - 20, WIDTH / 3, HEIGHT / 6);
     ctx.stroke();
 
-    ctx.font = '42px Arial';
+    ctx.font = '42px Monaco';
     ctx.fillStyle = this.buttonColor;
-    ctx.fillText('START GAME', WIDTH / 3 + 25, (HEIGHT / 7) * 5.55);
+    ctx.fillText('START GAME', WIDTH / 3 + 32, (HEIGHT / 7) * 5.55);
 
     ctx.drawImage(
         this.astronaut_img,
@@ -458,7 +458,7 @@ Game.prototype.drawSpaceship = function () {
 // draw HUD with lifes, number of collected goodies and distance in meters
 Game.prototype.drawHUD = function () {
     ctx.drawImage(this.lifes_img[this.lifes], 40, 40, 150, 50);
-    ctx.font = '40px Arial';
+    ctx.font = '40px Monaco';
     ctx.fillText(Math.floor(this.meters).toString() + 'm', WIDTH - 180, 75);
     ctx.fillText(this.numOfGoodies, WIDTH / 2 - 40, 79);
     ctx.drawImage(this.goodie_img, WIDTH / 2, 34, 60, 60);
@@ -474,15 +474,15 @@ Game.prototype.drawGameOverScreen = function () {
     ctx.rect(WIDTH / 3, (HEIGHT / 7) * 5 - 20, WIDTH / 3, HEIGHT / 6);
     ctx.stroke();
 
-    ctx.font = '42px Arial';
+    ctx.font = '42px Monaco';
     ctx.fillStyle = this.buttonColor;
     ctx.fillText('    RESTART  ', WIDTH / 3 + 25, (HEIGHT / 7) * 5.55);
 
-    ctx.font = '80px Arial';
+    ctx.font = '80px Monaco';
     ctx.fillStyle = 'white';
     ctx.fillText('Game Over', WIDTH / 3 - 30, 180);
 
-    ctx.font = '30px Arial';
+    ctx.font = '30px Monaco';
     ctx.fillText(
         'Your Score:     ' +
             String(parseInt(this.meters)) +
@@ -493,7 +493,7 @@ Game.prototype.drawGameOverScreen = function () {
         350
     );
 
-    ctx.font = '30px Arial';
+    ctx.font = '30px Monaco';
     ctx.fillText(
         'Highscore :     ' +
             String(parseInt(this.highscoreMeters)) +
