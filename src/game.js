@@ -476,11 +476,11 @@ Game.prototype.drawGameOverScreen = function () {
 
     ctx.font = '42px Monaco';
     ctx.fillStyle = this.buttonColor;
-    ctx.fillText('    RESTART  ', WIDTH / 3 + 25, (HEIGHT / 7) * 5.55);
+    ctx.fillText('     RESTART  ', WIDTH / 3 + 25, (HEIGHT / 7) * 5.55);
 
     ctx.font = '80px Monaco';
     ctx.fillStyle = 'white';
-    ctx.fillText('Game Over', WIDTH / 3 - 30, 180);
+    ctx.fillText('GAME OVER', WIDTH / 3 - 60, 180);
 
     ctx.font = '30px Monaco';
     ctx.fillText(
@@ -490,7 +490,7 @@ Game.prototype.drawGameOverScreen = function () {
             String(this.numOfGoodies) +
             ' stars',
         WIDTH / 4,
-        350
+        340
     );
 
     ctx.font = '30px Monaco';
@@ -501,6 +501,6 @@ Game.prototype.drawGameOverScreen = function () {
             String(this.highscoreGoodies) +
             ' stars',
         WIDTH / 4,
-        420
+        410
     );
 };
