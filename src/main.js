@@ -9,13 +9,9 @@ container.appendChild(canvas);
 
 // set globals
 const WIDTH = 1000,
-    HEIGHT = 800;
+    HEIGHT = 768;
 canvas.width = WIDTH;
 canvas.height = HEIGHT;
-
-// gets canvas offset with respect to its position on the browser window
-const canvasOffsetX = (window.screen.availWidth - WIDTH) / 2;
-const canvasOffsetY = 10;
 
 // saves state of currently pressed keys (formart: keyCode = Boolean)
 var keyState = {};
@@ -80,72 +76,140 @@ if (animationFrame !== null) {
 ================================ EVENT HANDLING ================================
 ***************************************************************************** */
 
+// returns position of touch press or mouse cursor
+function getClickPosition(canvas, e) {
+    var rect = canvas.getBoundingClientRect();
+    var x, y;
+
+    if (
+        e.type == 'touchstart' ||
+        e.type == 'touchmove' ||
+        e.type == 'touchend' ||
+        e.type == 'touchcancel'
+    ) {
+        var touch = e.touches[0] || e.changedTouches[0];
+        x = touch.pageX - rect.left;
+        y = touch.pageY - rect.top;
+    } else if (
+        e.type == 'mousedown' ||
+        e.type == 'mouseup' ||
+        e.type == 'mousemove' ||
+        e.type == 'mouseover' ||
+        e.type == 'mouseout' ||
+        e.type == 'mouseenter' ||
+        e.type == 'mouseleave'
+    ) {
+        x = e.clientX - rect.left;
+        y = e.clientY - rect.top;
+    }
+
+    return { x, y };
+}
+
+// handle button click
+function clickButton(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const { x, y } = getClickPosition(canvas, e);
+
+    if (
+        x < (WIDTH / 3) * 2 &&
+        x > WIDTH / 3 &&
+        y > (HEIGHT / 7) * 5 - 20 &&
+        y < (HEIGHT / 7) * 5 - 20 + HEIGHT / 6 &&
+        (game.isInStartMenu || game.isGameOver)
+    ) {
+        game.startNewGame();
+    }
+}
+
+// move spaceship away from the edges if it goes over them
+function correctSpaceshipPosition() {
+    if (
+        !game.inBounds(
+            WIDTH / 2 - 10 + game.spaceshipOffset + 50,
+            HEIGHT - 150
+        ) ||
+        !game.inBounds(WIDTH / 2 - 10 + game.spaceshipOffset - 50, HEIGHT - 150)
+    ) {
+        if (game.spaceshipOffset > 0)
+            game.spaceshipOffset -= 12 * game.speedBoost;
+        else game.spaceshipOffset += 12 * game.speedBoost;
+        return;
+    }
+}
+
 // move offeset of spaceship if arrow keys are pressed or resets ship if edges
 // are reached
-window.addEventListener(
+canvas.addEventListener(
     'keydown',
     function (e) {
-        if (
-            !game.inBounds(
-                WIDTH / 2 - 10 + game.spaceshipOffset + 50,
-                HEIGHT - 150
-            ) ||
-            !game.inBounds(
-                WIDTH / 2 - 10 + game.spaceshipOffset - 50,
-                HEIGHT - 150
-            )
-        ) {
-            if (game.spaceshipOffset > 0)
-                game.spaceshipOffset -= 12 * game.speedBoost;
-            else game.spaceshipOffset += 12 * game.speedBoost;
-            return;
-        }
+        correctSpaceshipPosition();
         keyState[e.keyCode || e.which] = true;
     },
     true
 );
 
-// reset key state to false if key is released
-window.addEventListener(
-    'keyup',
-    function (e) {
-        keyState[e.keyCode || e.which] = false;
-    },
-    true
-);
-
-// checks if start game or restart game buttons are pressed
-window.addEventListener(
-    'mouseup',
+// same for touch controls
+canvas.addEventListener(
+    'touchstart',
     function (e) {
         e.preventDefault();
-        e.stopPropagation();
+        correctSpaceshipPosition();
 
-        const x = e.clientX - canvasOffsetX;
-        const y = e.clientY - canvasOffsetY;
+        if (game.isInStartMenu) {
+            clickButton(e);
+            return;
+        }
 
-        if (
-            x < (WIDTH / 3) * 2 &&
-            x > WIDTH / 3 &&
-            y > (HEIGHT / 7) * 5 - 20 &&
-            y < (HEIGHT / 7) * 5 - 20 + HEIGHT / 6 &&
-            (game.isInStartMenu || game.isGameOver)
-        ) {
-            game.startNewGame();
+        if (game.isGameOver) {
+            clickButton(e);
+            return;
+        }
+
+        var { x, y } = getClickPosition(canvas, e);
+
+        if (x > WIDTH / 2) {
+            keyState[39] = true;
+        } else {
+            keyState[37] = true;
         }
     },
     true
 );
 
+// reset key state to false if key is released
+canvas.addEventListener(
+    'keyup',
+    function (e) {
+        e.preventDefault();
+        keyState[e.keyCode || e.which] = false;
+    },
+    true
+);
+
+// same for touch controls
+canvas.addEventListener(
+    'touchend',
+    function (e) {
+        keyState[37] = false;
+        keyState[39] = false;
+    },
+    true
+);
+
+// checks if start game or restart game buttons are pressed
+canvas.addEventListener('mouseup', clickButton, true);
+
 // hover effects on buttons
-window.addEventListener(
+canvas.addEventListener(
     'mousemove',
     function (e) {
         e.preventDefault();
         e.stopPropagation();
 
-        const x = e.clientX - canvasOffsetX;
-        const y = e.clientY - canvasOffsetY;
+        const { x, y } = getClickPosition(canvas, e);
 
         if (
             x < (WIDTH / 3) * 2 &&
