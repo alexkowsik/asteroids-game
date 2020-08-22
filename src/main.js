@@ -25,6 +25,7 @@ var main = function () {
     var delta = (now - then) / 1000;
 
     if (game.running) {
+        correctSpaceshipPosition();
         if (keyState[37]) game.spaceshipOffset -= 4 * game.speedBoost;
         if (keyState[39]) game.spaceshipOffset += 4 * game.speedBoost;
 
@@ -133,9 +134,8 @@ function correctSpaceshipPosition() {
         ) ||
         !game.inBounds(WIDTH / 2 - 10 + game.spaceshipOffset - 50, HEIGHT - 150)
     ) {
-        if (game.spaceshipOffset > 0)
-            game.spaceshipOffset -= 12 * game.speedBoost;
-        else game.spaceshipOffset += 12 * game.speedBoost;
+        if (game.spaceshipOffset > 0) game.spaceshipOffset = WIDTH / 2 - 40;
+        else game.spaceshipOffset = -WIDTH / 2 + 60;
         return;
     }
 }
