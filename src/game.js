@@ -60,10 +60,14 @@ export function Game(c, w, h) {
     this.spaceshipHurt_img.src = 'img/spaceship_hurt.png';
     this.spaceshipUsed = this.spaceship_img;
 
-    this.asteroids_img = [null, null, null, null].map((_) => new Image());
+    this.asteroids_img = Array(8)
+        .fill(null)
+        .map((_) => new Image());
     this.asteroids_img.forEach((element, index) => {
         element.src = 'img/asteroid' + String(index + 1) + '.png';
+        console.log(index, element.src);
     });
+    console.log(this.asteroids_img);
 
     this.lifes_img = [null, null, null, null].map((_) => new Image());
     this.lifes_img.forEach((element, index) => {
@@ -212,7 +216,7 @@ Game.prototype.spawnAsteroidWithProb = function () {
                 y: this.asteroidSpeed.y,
             },
             scale: Math.random() * (1.25 - 0.75) + 0.75,
-            type: Math.floor(Math.random() * 3) + 1,
+            type: Math.floor(Math.random() * 7) + 1,
         };
         this.asteroids.push(asteroid);
     }
@@ -440,7 +444,7 @@ Game.prototype.drawAsteroids = function () {
 Game.prototype.drawGoodies = function () {
     for (var i = 0; i < this.goodies.length; i++) {
         var goodie = this.goodies[i];
-        ctx.drawImage(this.goodie_img, goodie.x, goodie.y, 90, 90);
+        ctx.drawImage(this.goodie_img, goodie.x, goodie.y, 75, 75);
     }
 };
 
