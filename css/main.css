@@ -1,0 +1,31 @@
+body, html { 
+    margin: 0;
+    padding: 0;
+    background-color: #000;
+    background-image: url('../img/stars_in_space.png');
+}
+
+canvas {
+    border: 0px none black;
+    outline: none;
+}
+
+.centered {
+    position: fixed; 
+    top: 50%; 
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#wrapper {
+    display:flex; 
+    align-items: center; 
+    justify-content: center;
+}
+
+#timeUpText {
+    text-align: center;
+    color: white; 
+    font-size: 70px;
+    width: 700px;
+}
